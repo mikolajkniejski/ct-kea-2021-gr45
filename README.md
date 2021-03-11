@@ -1,7 +1,9 @@
 # ct-kea-2021-gr45
 # Students:
 Jan Guilherme Figueira Dissing - janx091u@stud.kea.dk
+
 Mikolaj Andrzej Kniejski - miko0169@stud.kea.dk
+
 Sirichudharath Stolberg - juth0039@stud.kea.dk
 
 # Coderstrust Quizzes DB
