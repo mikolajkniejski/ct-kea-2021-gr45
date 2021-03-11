@@ -22,7 +22,7 @@ For this scripts to work you need to have installed MySQL server and MySQL Workb
 
 <b>Step 3: Extracting relevant information from the database tables:</b>  
 1. Load the "ct-kea-2021-gr45-Queries.sql" file on MySQL Workbench.
-2. In this step it is important to run query by query, so the results can be seen individually. Select the query by pressing the cursor on any place within the query and run by clicking the "thunderbolt with cursor marker" icon button.
+2. In this step it is important to run query by query, so the results can be seen individually. Select the query by pressing the cursor on any place within the query and run by clicking the "thunderbolt with placeholder marker" icon button.
 3. Each query has comments above it so you should be able to understand whats going on.
 
 
