@@ -12,7 +12,7 @@ Last_Name VARCHAR(25),
 Gender ENUM('F','M'),
 Birthdate date,
 Email VARCHAR(25),
-Member tinyint,
+IsMember tinyint,
 PRIMARY KEY (User_id)
 );
 
@@ -22,7 +22,7 @@ User_id int NOT NULL,
 CreditCard_N VARCHAR(16),
 CC_Exp_date date,
 CC_Brand VARCHAR(25),
-Active tinyint,
+IsActive tinyint,
 PRIMARY KEY (Payment_id),
 FOREIGN KEY (User_id) REFERENCES Users(User_id) ON DELETE CASCADE
 );
@@ -55,7 +55,7 @@ CREATE TABLE Courses (
 Course_id int NOT NULL auto_increment,
 DateofCreation datetime NOT NULL,
 Course_Name VARCHAR(180) NOT NULL,
-Description VARCHAR(250),
+C_Description VARCHAR(250),
 Area_id int NOT NULL,
 Level_id int NOT NULL,
 PRIMARY KEY (Course_id),
@@ -66,7 +66,7 @@ FOREIGN KEY (Level_id) REFERENCES Levels(Level_id)
 CREATE TABLE Quizzes(
 Quiz_id int NOT NULL AUTO_INCREMENT,
 Q_Name VARCHAR(25) NOT NULL,
-Description VARCHAR(180),
+Q_Description VARCHAR(180),
 Course_id int DEFAULT NULL,
 PRIMARY KEY (Quiz_id)
 );
@@ -99,12 +99,12 @@ FOREIGN KEY (Question_id) REFERENCES Questions(Question_id)
 );
 
 CREATE TABLE Q_Answers(
-Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+C_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 User_id int NOT NULL,
 Quiz_id int NOT NULL,
 Question_id int NOT NULL,
 Option_id TINYINT NOT NULL,
-PRIMARY KEY (User_id, Quiz_id, Question_id, Date),
+PRIMARY KEY (User_id, Quiz_id, Question_id, C_Date),
 FOREIGN KEY (User_id) REFERENCES Users(User_id) ON DELETE CASCADE,
 FOREIGN KEY (Quiz_id) REFERENCES Quizzes(Quiz_id) ON DELETE CASCADE,
 FOREIGN KEY (Question_id) REFERENCES Questions(Question_id) ON DELETE CASCADE

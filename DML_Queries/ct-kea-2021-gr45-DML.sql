@@ -3,7 +3,7 @@ USE CTdb;
 
 # Inserting data into the database's tables
 # Below we insert random users as members
-INSERT INTO Users (First_Name, Last_Name, Gender, Birthdate, Email, Member)
+INSERT INTO Users (First_Name, Last_Name, Gender, Birthdate, Email, IsMember)
 VALUES
 ('Mark', 'Carlsberg', 'M', '1986-02-15', 'markc@gmail.com', '1'),
 ('Luiza', 'Budweiser', 'F', '1990-09-09', 'luizat@hotmail.com', '1'),
@@ -14,7 +14,7 @@ VALUES
 ('Jasmin', 'Antonberg', 'F', '1990-07-26', 'jasss@company.com', '1');
 
 # Below we insert visitors who completed the test but are not members
-INSERT INTO Users (Member)
+INSERT INTO Users (IsMember)
 VALUES
 (0),
 (0),
@@ -28,7 +28,7 @@ VALUES
 (3, 'Denmark', '', 'Copenhagen', '2400', 'Ringsted gade 20');
 
 # Below we insert payment information for some users.
-INSERT INTO PaymentInfo (User_id, CreditCard_N, CC_Exp_date, CC_Brand, Active)
+INSERT INTO PaymentInfo (User_id, CreditCard_N, CC_Exp_date, CC_Brand, IsActive)
 VALUES
 (1, '9999888877775555', '2024-08-31', 'Master Card', '1'),
 (2, '9876475600237731', '2025-10-31', 'American Express', '1'),
@@ -78,7 +78,7 @@ from home', 4, 2),
 
 # Below we insert the name of the Quiz names, leaving out the id because its
 # auto_increment.
-INSERT INTO Quizzes (Q_Name, Description, Course_id)
+INSERT INTO Quizzes (Q_Name, Q_Description, Course_id)
 VALUES
 ('Area of Interest Quiz', 'This questionnarie will brighten up which path to follow. With questions relevant for 
 each area, it is possible to know which courses to offer the user.', NULL),
@@ -154,7 +154,7 @@ VALUES
 
 # Below we insert a new quiz taken by the user 1. It differs from the first
 # because it has a different Date.
-INSERT INTO Q_Answers (Date, User_id, Quiz_id, Question_id, Option_id)
+INSERT INTO Q_Answers (C_Date, User_id, Quiz_id, Question_id, Option_id)
 VALUES
 ('2021-02-28', 1, 1, 1, 1), ('2021-02-28', 1, 1, 2, 1), ('2021-02-28', 1, 1, 3, 1), ('2021-02-28', 1, 1, 4, 0),
 ('2021-02-28', 1, 1, 5, 1), ('2021-02-28', 1, 1, 6, 1), ('2021-02-28', 1, 1, 7, 0), ('2021-02-28', 1, 1, 8, 1),
