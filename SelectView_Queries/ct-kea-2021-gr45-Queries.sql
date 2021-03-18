@@ -13,7 +13,7 @@ ORDER BY FIND_IN_SET(q.Question_id, '9,1,5,6,10,2,3,7,11,12,8,4');
 # (02) Query below extracts the answers to each question of each Quiz
 # ordered in sequence by User_id, Quiz_id and Question_id.
 # (points can be different for the same question when on a different quiz)
-SELECT a.Date, a.User_id, qn.Q_Name, a.Question_id, ar.Area_Name, 
+SELECT a.C_Date, a.User_id, qn.Q_Name, a.Question_id, ar.Area_Name, 
 qq.Points, q.Question, qo.Option_desc AS 'Chosen Answer', qq.Points, qo.Grants_Points 
 FROM CTdb.Q_Answers a 
 JOIN CTdb.Questions q ON a.Question_id = q.Question_id
@@ -22,12 +22,12 @@ JOIN CTdb.Quizzes qz ON a.Quiz_id = qz.Quiz_id
 JOIN CTdb.Question_Options qo ON (a.Question_id = qo.Question_id AND a.Option_id = qo.Option_id)
 JOIN CTdb.Quiz_Questions qq ON (a.Quiz_id = qq.Quiz_id) AND (a.Question_id = qq.Question_id)
 JOIN CTdb.Quizzes qn ON qq.Quiz_id = qn.Quiz_id
-ORDER BY a.User_id, a.Date, qz.Quiz_id, a.Question_id;
+ORDER BY a.User_id, a.C_Date, qz.Quiz_id, a.Question_id;
 
 
 # (03) Query below shows users enrolled in available courses.
 SELECT e.Enr_id, e.Enr_Date, u.User_id, u.First_Name, u.Last_Name, c.Course_Name,
-a.Area_Name AS Area, l.Level_Name AS Level
+a.Area_Name AS Area, l.Level_Name AS `Level`
 FROM Enrollments e
 JOIN Users u ON e.User_id = u.User_id
 JOIN Courses c ON e.Course_id = c.Course_id
@@ -47,7 +47,7 @@ WHERE c.Level_id = 1;
 # for Quiz_id = 1. Altering data in this query will affect queries below that
 # uses the generated table for simplicity purposes. (Alter after WHERE)
 CREATE OR REPLACE VIEW Points_User_Date_Area AS
-SELECT u.User_id AS User_id, a.Date, qz.Q_Name AS Quiz, CONCAT(u.First_Name, ' ', u.Last_Name) AS Name, c.Course_Name, ar.Area_Name AS Area, SUM(qo.Grants_Points*qq.Points) AS Points
+SELECT u.User_id AS User_id, a.C_Date, qz.Q_Name AS Quiz, CONCAT(u.First_Name, ' ', u.Last_Name) AS `Name`, c.Course_Name, ar.Area_Name AS Area, SUM(qo.Grants_Points*qq.Points) AS Points
 	FROM CTdb.Q_Answers a 
 	JOIN CTdb.Questions q ON q.Question_id = a.Question_id 
     JOIN CTdb.Areas ar ON q.Area_id = ar.Area_id
@@ -57,8 +57,8 @@ SELECT u.User_id AS User_id, a.Date, qz.Q_Name AS Quiz, CONCAT(u.First_Name, ' '
     LEFT JOIN CTdb.Courses c ON c.Course_id = qz.Course_id
     JOIN CTdb.Quiz_Questions qq ON (a.Quiz_id = qq.Quiz_id) AND (a.Question_id = qq.Question_id)
     WHERE (qz.Quiz_id = 1)
-	GROUP BY qz.Quiz_id, ar.Area_Name, u.User_id, a.Date
-	ORDER BY a.Date, u.User_id;
+	GROUP BY qz.Quiz_id, ar.Area_Name, u.User_id, a.C_Date
+	ORDER BY a.C_Date, u.User_id;
 # (05-B) Query below shows the view above.
 SELECT * FROM CTdb.Points_User_Date_Area;
 
@@ -66,7 +66,7 @@ SELECT * FROM CTdb.Points_User_Date_Area;
 # (06-A) Query below creates or replaces a view of a table showing Total points made by each user
 # and date for the Quiz_id=1 (this spec needs to be the same as Query 05-B.
 CREATE OR REPLACE VIEW TotalPoints_User_Date AS
-SELECT u.User_id AS User_id, a.Date, qz.Q_Name AS Quiz, SUM(qo.Grants_Points*qq.Points) AS Total_Points
+SELECT u.User_id AS User_id, a.C_Date, qz.Q_Name AS Quiz, SUM(qo.Grants_Points*qq.Points) AS Total_Points
 	FROM CTdb.Q_Answers a 
 	JOIN CTdb.Questions q ON q.Question_id = a.Question_id 
 	JOIN CTdb.Users u ON u.User_id = a.User_id
@@ -74,8 +74,8 @@ SELECT u.User_id AS User_id, a.Date, qz.Q_Name AS Quiz, SUM(qo.Grants_Points*qq.
     JOIN CTdb.Question_Options qo ON (a.Question_id = qo.Question_id AND a.Option_id = qo.Option_id)
     JOIN CTdb.Quiz_Questions qq ON (a.Quiz_id = qq.Quiz_id) AND (a.Question_id = qq.Question_id)
     WHERE (qz.Quiz_id = 1)
-	GROUP BY qz.Quiz_id, u.User_id, a.Date
-	ORDER BY u.User_id, a.Date;
+	GROUP BY qz.Quiz_id, u.User_id, a.C_Date
+	ORDER BY u.User_id, a.C_Date;
 # (06-B) Query below shows the view above in the result grid.
 SELECT * FROM CTdb.TotalPoints_User_Date;
 
@@ -88,7 +88,7 @@ FROM
     CTdb.Points_User_Date_Area t1
 LEFT JOIN
     CTdb.TotalPoints_User_Date t2  
-ON (t1.User_id = t2.User_id AND t1.Date = t2.Date);
+ON (t1.User_id = t2.User_id AND t1.C_Date = t2.C_Date);
 # (07-B) Query below shows the view above in the result grid.
 SELECT * FROM CTdb.Percentage_User_Area_Date;
 
@@ -96,16 +96,16 @@ SELECT * FROM CTdb.Percentage_User_Area_Date;
 # (08) Query below generates a transposed table with the percentage values 
 # for each area as new columns for each user for a specific Quiz
 # (chosen in queries 05 and 06).
-SELECT User_id, Date, Name,
+SELECT User_id, C_Date, `Name`,
 sum(IF(Area='Graphical Design', Percentage, NULL)) AS 'Graphical Design',
-sum(IF(Area='Programming', Percentage, NULL)) AS Programmin,
+sum(IF(Area='Programming', Percentage, NULL)) AS Programming,
 sum(IF(Area='Social Media', Percentage, NULL)) AS 'Social Media'
 FROM (SELECT t1.*, t2.Total_Points, CAST((t1.Points/t2.Total_Points)*100 AS DECIMAL(5,2)) AS Percentage 
 FROM 
     CTdb.Points_User_Date_Area t1
 LEFT JOIN
     CTdb.TotalPoints_User_Date t2  
-ON (t1.User_id = t2.User_id AND t1.Date = t2.Date)) t3 GROUP BY User_id, Date;
+ON (t1.User_id = t2.User_id AND t1.C_Date = t2.C_Date)) t3 GROUP BY User_id, C_Date;
     
 
 # (09-A) Below is the query to extract wich area each user is more attracted to
@@ -114,18 +114,18 @@ ON (t1.User_id = t2.User_id AND t1.Date = t2.Date)) t3 GROUP BY User_id, Date;
 CREATE OR REPLACE VIEW ListofTests_by_AreaofInterest AS 
 SELECT * FROM 
 CTdb.Percentage_User_Area_Date t1 
-WHERE (User_id, Date, Percentage) IN 
- (Select User_id, Date, MAX(Percentage) FROM 
+WHERE (User_id, C_Date, Percentage) IN 
+ (Select User_id, C_Date, MAX(Percentage) FROM 
 	CTdb.Percentage_User_Area_Date t2
-	GROUP BY User_id, Date);
+	GROUP BY User_id, C_Date);
 # (09-B) Show the view above.
 SELECT * FROM CTdb.ListofTests_by_AreaofInterest;
 
 
 # (10) Query below extracts a table with the list of users that participated
 # in a specific Quiz.
-SELECT DISTINCT u.User_id, a.Date,
-CONCAT(u.First_Name, ' ', u.Last_Name) AS Name
+SELECT DISTINCT u.User_id, a.C_Date,
+CONCAT(u.First_Name, ' ', u.Last_Name) AS `Name`
 FROM CTdb.Users u
 JOIN CTdb.Q_Answers a ON u.User_id = a.User_id
 WHERE a.Quiz_id = 1;
@@ -143,36 +143,36 @@ GROUP BY Quiz_id;
 
 # (12) Query below extracts a table with a list of users who are active
 # i.e., are paying customers.
-SELECT u.*, p.Active FROM CTdb.PaymentInfo p
+SELECT u.*, p.IsActive FROM CTdb.PaymentInfo p
 JOIN CTdb.Users u ON p.User_id = u.User_id
-WHERE p.Active = 1;
+WHERE p.IsActive = 1;
 
 
 # (13) Query below extracts a table with a list of users with address who are member.
-SELECT u.*, p.Active, 
+SELECT u.*, p.IsActive, 
 CONCAT(ad.Street, ' ', ad.City, ' ', ad.State, '-', ad.Zip_code, ' ', ad.Country) AS Address
 FROM CTdb.PaymentInfo p
 RIGHT JOIN CTdb.Users u ON p.User_id = u.User_id
 LEFT JOIN CTdb.Addresses ad ON u.User_id = ad.User_id
-WHERE u.Member = 1;
+WHERE u.IsMember = 1;
 
 
 # (14) Query below extracts a table with a list of users who are not member.
 # i.e., anonymous visitors/users.
-SELECT u.*, p.Active FROM CTdb.PaymentInfo p
+SELECT u.*, p.IsActive FROM CTdb.PaymentInfo p
 RIGHT JOIN CTdb.Users u ON p.User_id = u.User_id
-WHERE u.Member = 0;
+WHERE u.IsMember = 0;
 
 
 # (15) Query below shows a list of users(excluding anonymous) from quiz id 1 who have 
 # interest in the Programming Area !!
-SELECT DISTINCT User_id, Name FROM CTdb.ListofTests_by_AreaofInterest
-    WHERE (Area = 'Programming' AND Name IS NOT NULL);
+SELECT DISTINCT User_id, `Name` FROM CTdb.ListofTests_by_AreaofInterest
+    WHERE (Area = 'Programming' AND `Name` IS NOT NULL);
     
 
 # (16) Query below shows a list of users(including anonymous) from quiz id 1 who have 
 # interest in the Social Media Area !!
-SELECT DISTINCT User_id, Name FROM CTdb.ListofTests_by_AreaofInterest
+SELECT DISTINCT User_id, `Name` FROM CTdb.ListofTests_by_AreaofInterest
     WHERE (Area = 'Social Media');
 
 
